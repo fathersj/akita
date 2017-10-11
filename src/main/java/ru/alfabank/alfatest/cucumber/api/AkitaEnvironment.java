@@ -17,27 +17,28 @@ package ru.alfabank.alfatest.cucumber.api;
 
 import cucumber.api.Scenario;
 import lombok.extern.slf4j.Slf4j;
+import org.reflections.Reflections;
 import ru.alfabank.alfatest.cucumber.ScopedVariables;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Set;
 
 /**
- * Класс, связанный с AkitaScenario, используется для хранения страниц и переменных внутри сценария
+ * Scenario for using variables and pages with annotation "AkitaPage"
  */
 @Slf4j
 public class AkitaEnvironment {
 
-    /**
-     * Сценарий (Cucumber.api), с которым связана среда
-     */
     private Scenario scenario;
+
     /**
-     * Переменные, объявленные пользователем внутри сценария
-     * ThreadLocal обеспечивает отсутствие коллизий при многопоточном запуске
+     * Variables for using in tests
      */
     private ThreadLocal<ScopedVariables> variables = new ThreadLocal<>();
+
     /**
-     * Список веб-страниц, заданных пользователем, доступных для использования в сценариях
+     * List of pages with annotation AkitaPage
      */
     private Pages pages = new Pages();
 
@@ -51,38 +52,32 @@ public class AkitaEnvironment {
     }
 
     /**
-     * Метод ищет классы, аннотированные "AkitaPage.Name",
-     * добавляя ссылки на эти классы в поле "pages"
+     * Find and add all classes with annotation
+     * "AkitaPage" to Pages
      */
     @SuppressWarnings("unchecked")
     private void initPages() {
-        new AnnotationScanner().getClassesAnnotatedWith(AkitaPage.Name.class)
+        getClassesAnnotatedWith(AkitaPage.Name.class)
                 .stream()
                 .map(it -> {
                     if (AkitaPage.class.isAssignableFrom(it)) {
                         return (Class<? extends AkitaPage>) it;
                     } else {
-                        throw new IllegalStateException("Класс " + it.getName() + " должен наследоваться от AkitaPage");
+                        return null;
                     }
                 })
-                .forEach(clazz -> pages.put(getClassAnnotationValue(clazz), clazz));
+                .forEach(addClass -> pages.put(getClassAnnotationValue(addClass), addClass));
     }
 
-    /**
-     * Вспомогательный метод, получает значение аннотации "AkitaPage.Name" для класса
-     *
-     * @param c класс, который должен быть аннотирован "AkitaPage.Name"
-     * @return значение аннотации "AkitaPage.Name" для класса
-     */
     private String getClassAnnotationValue(Class<?> c) {
         return Arrays.stream(c.getAnnotationsByType(AkitaPage.Name.class))
                 .findAny()
                 .map(AkitaPage.Name::value)
-                .orElseThrow(() -> new AssertionError("Не найдены аннотации AkitaPage.Name в класса " + c.getClass().getName()));
+                .orElseThrow(() -> new AssertionError(String.format("There's no annotation in %s class", c.getClass().getName())));
     }
 
     /**
-     * Выводит дополнительный информационный текст в отчет (уровень логирования INFO)
+     * Additional log (level INFO)
      */
     public void write(Object object) {
         scenario.write(String.valueOf(object));
@@ -121,5 +116,14 @@ public class AkitaEnvironment {
             variables.set(new ScopedVariables());
         }
         return variables.get();
+    }
+
+    private static Reflections reflection = new Reflections();
+
+    /**
+     * Find all classes with annotation
+     */
+    private Set<Class<?>> getClassesAnnotatedWith(Class<? extends Annotation> annotation) {
+        return reflection.getTypesAnnotatedWith(annotation);
     }
 }

@@ -22,22 +22,12 @@ import ru.alfabank.alfatest.cucumber.ScopedVariables;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-/**
- * Главный класс, отвечающий за сопровождение тестовых шагов
- */
 @Slf4j
 public final class AkitaScenario {
 
     private static AkitaScenario instance = new AkitaScenario();
 
-    /**
-     * Среда прогона тестов, хранит в себе: Cucumber.Scenario,
-     * переменные, объявленные пользователем в сценарии и страницы, тестирование которых будет производиться
-     */
     private static AkitaEnvironment environment;
-
-    private AkitaScenario() {
-    }
 
     public static AkitaScenario getInstance() {
         return instance;

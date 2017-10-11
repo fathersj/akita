@@ -15,6 +15,11 @@
  */
 package ru.alfabank.alfatest.cucumber.api;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static ru.alfabank.tests.core.helpers.PropertyLoader.loadProperty;
+
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsContainer;
 import com.codeborne.selenide.SelenideElement;
@@ -28,11 +33,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Stream;
-
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static ru.alfabank.tests.core.helpers.PropertyLoader.loadProperty;
 
 /**
  * Класс-аннотация для реализации паттерна PageObject

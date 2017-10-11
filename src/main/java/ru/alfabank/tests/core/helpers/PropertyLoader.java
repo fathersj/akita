@@ -124,7 +124,7 @@ public class PropertyLoader {
      * @param propertyName название свойства
      * @return значение свойства
      */
-    public static String tryLoadProperty(String propertyName) {
+    private static String tryLoadProperty(String propertyName) {
         String value = null;
         if (!Strings.isNullOrEmpty(propertyName)) {
             value = PROFILE_PROPERTIES.getProperty(propertyName);
@@ -168,6 +168,7 @@ public class PropertyLoader {
         if (!Strings.isNullOrEmpty(profile)) {
             String path = Paths.get(profile, PROPERTIES_FILE).toString();
             URL url = PropertyLoader.class.getClassLoader().getResource(path);
+            assert url != null;
             try (
                     InputStream resourceStream = url.openStream();
                     InputStreamReader inputStream = new InputStreamReader(resourceStream, Charset.forName("UTF-8"))
@@ -178,4 +179,3 @@ public class PropertyLoader {
         return instance;
     }
 }
-

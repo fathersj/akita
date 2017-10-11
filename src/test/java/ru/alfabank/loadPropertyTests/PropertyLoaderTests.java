@@ -15,6 +15,9 @@
  */
 package ru.alfabank.loadPropertyTests;
 
+import static org.junit.Assert.assertThat;
+import static ru.alfabank.steps.DefaultApiSteps.resolveVars;
+
 import com.codeborne.selenide.WebDriverRunner;
 import org.hamcrest.Matchers;
 import org.junit.AfterClass;
@@ -23,9 +26,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import ru.alfabank.alfatest.cucumber.api.AkitaEnvironment;
 import ru.alfabank.alfatest.cucumber.api.AkitaScenario;
-
-import static org.junit.Assert.assertThat;
-import static ru.alfabank.steps.DefaultApiSteps.resolveVars;
 
 public class PropertyLoaderTests {
     private static AkitaScenario akitaScenario = AkitaScenario.getInstance();
