@@ -27,12 +27,9 @@ import java.util.Map;
 
 import static ru.alfabank.tests.core.helpers.PropertyLoader.loadSystemPropertyOrDefault;
 
-
 /**
  * Эмуляция мобильной версии браузера Google Chrome
  */
-
-
 @Slf4j
 public class MobileChrome implements WebDriverProvider {
 
@@ -59,6 +56,4 @@ public class MobileChrome implements WebDriverProvider {
         desiredCapabilities.setBrowserName(desiredCapabilities.chrome().getBrowserName());
         return new ChromeDriver(desiredCapabilities);
     }
-
-
 }

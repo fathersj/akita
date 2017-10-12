@@ -92,6 +92,7 @@ public class AkitaEnvironment {
     }
 
     public void setVar(String name, Object object) {
+        getVariables().remove(name);
         getVariables().put(name, object);
     }
 

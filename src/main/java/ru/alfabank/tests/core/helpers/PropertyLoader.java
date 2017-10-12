@@ -35,7 +35,6 @@ public class PropertyLoader {
     private static final Properties PROFILE_PROPERTIES = getProfilePropertiesInstance();
 
     private PropertyLoader() {
-
     }
 
     /**

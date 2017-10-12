@@ -32,6 +32,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 
 public class AkitaScenarioTest {
+
     private static AkitaScenario akitaScenario;
 
     @BeforeClass
@@ -99,5 +100,4 @@ public class AkitaScenarioTest {
     public void setCurrentPageNegative() {
         akitaScenario.setCurrentPage(null);
     }
-
 }

@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
 public class ScopedVariablesTest {
+
     private static ScopedVariables variables;
 
     @BeforeClass

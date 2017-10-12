@@ -35,38 +35,39 @@ import java.util.*;
 import java.util.stream.Stream;
 
 /**
- * Класс-аннотация для реализации паттерна PageObject
+ * Annotation for PageObject
  */
 @Slf4j
 public abstract class AkitaPage extends ElementsContainer {
-    /**
-     * Стандартный таймаут ожидания элементов в миллисекундах
-     */
-    private static final String WAITING_APPEAR_TIMEOUT_IN_MILLISECONDS = "8000";
 
     /**
-     * Получение элемента со страницы по имени (аннотированного "Name")
+     * Timeout for waiting elements
+     */
+    private static final String WAITING_APPEAR_TIMEOUT_IN_MILLISECONDS = "5000";
+
+    /**
+     * Get element by his name
      */
     public SelenideElement getElement(String elementName) {
         return (SelenideElement) java.util.Optional.ofNullable(namedElements.get(elementName))
-                .orElseThrow(() -> new IllegalArgumentException("Элемент " + elementName + " не описан на странице " + this.getClass().getName()));
+                .orElseThrow(() -> new IllegalArgumentException(String.format("There's no %s element on the current page %s", elementName, this.getClass().getName())));
     }
 
     /**
-     * Получение элемента-списка со страницы по имени
+     * Get List of elements by his name
      */
     @SuppressWarnings("unchecked")
     public List<SelenideElement> getElementsList(String listName) {
         Object value = namedElements.get(listName);
         if (!(value instanceof List)) {
-            throw new IllegalArgumentException("Список " + listName + " не описан на странице " + this.getClass().getName());
+            throw new IllegalArgumentException(String.format("There's no %s on the current page %s", listName, this.getClass().getName()));
         }
         Stream<Object> s = ((List) value).stream();
         return s.map(AkitaPage::castToSelenideElement).collect(toList());
     }
 
     /**
-     * Получение текста элемента, как редактируемого поля, так и статичного элемента по имени
+     * Get text of element by his name
      */
     public String getAnyElementText(String elementName) {
         SelenideElement element = getElement(elementName);
@@ -78,8 +79,7 @@ public abstract class AkitaPage extends ElementsContainer {
     }
 
     /**
-     * Получение текстов всех элементов, содержащихся в элементе-списке,
-     * состоящего как из редактируемых полей, так и статичных элементов по имени
+     * Get all text of element by his name
      */
     public List<String> getAnyElementsListTexts(String listName) {
         List<SelenideElement> elementsList = getElementsList(listName);
@@ -92,7 +92,7 @@ public abstract class AkitaPage extends ElementsContainer {
     }
 
     /**
-     * Аннотация для элементов страницы, служащая для их индентификации в cucumber-сценариях
+     * Annotation Name for using elements by their names in features
      */
     @Target({ElementType.FIELD, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
@@ -101,8 +101,7 @@ public abstract class AkitaPage extends ElementsContainer {
     }
 
     /**
-     * Аннотация для элементов страницы,
-     * служащая для отключения проверки появления элемента после загрузки страницы
+     * Annotation for optional elements on the page
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
@@ -110,7 +109,7 @@ public abstract class AkitaPage extends ElementsContainer {
     }
 
     /**
-     * Получение всех элементов страницы, не помеченных аннотацией "Optional"
+     * Get all element with annotation @Name
      */
     public List<SelenideElement> getPrimaryElements() {
         if (primaryElements == null) {
@@ -120,66 +119,44 @@ public abstract class AkitaPage extends ElementsContainer {
     }
 
     /**
-     * Обертка над AkitaPage.isAppeared
-     * Ex: AkitaPage.appeared().doSomething();
+     * Check that all non-optional elements are on the current page
      */
     public final AkitaPage appeared() {
-        isAppeared();
-        return this;
-    }
-
-    /**
-     * Обертка над AkitaPage.isDisappeared
-     * Ex: AkitaPage.disappeared().doSomething();
-     */
-    public final AkitaPage disappeared() {
-        isDisappeared();
-        return this;
-    }
-
-    /**
-     * Проверка появления всех элементов страницы, не помеченных аннотацией "Optional"
-     */
-    protected void isAppeared() {
         String timeout = loadProperty("waitingAppearTimeout", WAITING_APPEAR_TIMEOUT_IN_MILLISECONDS);
         getPrimaryElements().parallelStream().forEach(elem ->
                 elem.waitUntil(Condition.appear, Integer.valueOf(timeout)));
+        return this;
     }
 
     /**
-     * Проверка, что все элементы страницы, не помеченные аннотацией "Optional", исчезли
+     * Check that all non-optional elements aren't on the current page
      */
-    protected void isDisappeared() {
+    public final AkitaPage disappeared() {
         String timeout = loadProperty("waitingAppearTimeout", WAITING_APPEAR_TIMEOUT_IN_MILLISECONDS);
         getPrimaryElements().parallelStream().forEach(elem ->
                 elem.waitWhile(Condition.exist, Integer.valueOf(timeout)));
+        return this;
     }
 
     /**
-     * Обертка над Selenide.waitUntil для произвольного количества элементов
+     * Waiting new condition for elements with timeout
      *
      * @param condition Selenide.Condition
-     * @param timeout   максимальное время ожидания для перехода элементов в заданное состояние
-     * @param elements  произвольное количество selenide-элементов
+     * @param timeout   time of waiting
+     * @param elements  elements
      */
     public void waitElementsUntil(Condition condition, int timeout, SelenideElement... elements) {
         Spectators.waitElementsUntil(condition, timeout, elements);
     }
 
-    /**
-     * Обертка над Selenide.waitUntil для работы со списком элементов
-     *
-     * @param elements список selenide-элементов
-     */
     public void waitElementsUntil(Condition condition, int timeout, List<SelenideElement> elements) {
         Spectators.waitElementsUntil(condition, timeout, elements);
     }
 
     /**
-     * Проверка, что все переданные элементы в течении заданного периода времени
-     * перешли в состояние Selenide.Condition
+     * Waiting new condition for elements by their names, with timeout
      *
-     * @param elementNames произвольное количество строковых переменных с именами элементов
+     * @param elementNames names of elements
      */
     public void waitElementsUntil(Condition condition, int timeout, String... elementNames) {
         List<SelenideElement> elements = Arrays.stream(elementNames)
@@ -192,18 +169,18 @@ public abstract class AkitaPage extends ElementsContainer {
     }
 
     /**
-     * Поиск элемента по имени внутри списка элементов
+     * Find element by his name in the list of elements
      */
-    public static SelenideElement getButtonFromListByName(List<SelenideElement> listButtons, String nameOfButton) {
+    public static SelenideElement getElementFromListByName(List<SelenideElement> listElements, String nameOfElement) {
         List<String> names = new ArrayList<>();
-        for (SelenideElement button : listButtons) {
-            names.add(button.getText());
+        for (SelenideElement element : listElements) {
+            names.add(element.getText());
         }
-        return listButtons.get(names.indexOf(nameOfButton));
+        return listElements.get(names.indexOf(nameOfElement));
     }
 
     /**
-     * Приведение объекта к типу SelenideElement
+     * Cast element to SelenideElement
      */
     private static SelenideElement castToSelenideElement(Object object) {
         if (object instanceof SelenideElement) {
@@ -213,11 +190,12 @@ public abstract class AkitaPage extends ElementsContainer {
     }
 
     /**
-     * Список всех элементов страницы
+     * Map of all elements on the page
      */
     private Map<String, Object> namedElements;
+
     /**
-     * Список элементов страницы, не помеченных аннотацией "Optional"
+     * All non-optional elements
      */
     private List<SelenideElement> primaryElements;
 
@@ -227,14 +205,14 @@ public abstract class AkitaPage extends ElementsContainer {
         initialize();
     }
 
-    public AkitaPage initialize() {
+    AkitaPage initialize() {
         namedElements = readNamedElements();
         primaryElements = readWithWrappedElements();
         return this;
     }
 
     /**
-     * Поиск и инициализации элементов страницы
+     * Find and initialize all elements in the page
      */
     private Map<String, Object> readNamedElements() {
         checkNamedAnnotations();
@@ -243,13 +221,13 @@ public abstract class AkitaPage extends ElementsContainer {
                 .peek(f -> {
                     if (!SelenideElement.class.isAssignableFrom(f.getType()) && !List.class.isAssignableFrom(f.getType()))
                         throw new IllegalStateException(
-                                format("Поле с аннотацией @Name должно иметь тип SelenideElement или List<SelenideElement>, но найдено поле с типом %s", f.getType()));
+                                format("Field %s with @Name must has type SelenideElement or List<SelenideElement>, but has %s", f.getName(), f.getType()));
                 })
                 .collect(toMap(f -> f.getDeclaredAnnotation(Name.class).value(), this::extractFieldValueViaReflection));
     }
 
     /**
-     * Поиск по аннотации "Name"
+     * Search all elements with annotation Name
      */
     private void checkNamedAnnotations() {
         List<String> list = Arrays.stream(getClass().getDeclaredFields())
@@ -257,12 +235,12 @@ public abstract class AkitaPage extends ElementsContainer {
                 .map(f -> f.getDeclaredAnnotation(Name.class).value())
                 .collect(toList());
         if (list.size() != new HashSet<>(list).size()) {
-            throw new IllegalStateException("Найдено несколько аннотаций @Name с одинаковым значением в классе " + this.getClass().getName());
+            throw new IllegalStateException("More then 1 element with the same name " + this.getClass().getName());
         }
     }
 
     /**
-     * Поиск и инициализации элементов страницы без аннотации Optional
+     * Find and initialize all non-optional elements in the page
      */
     private List<SelenideElement> readWithWrappedElements() {
         return Arrays.stream(getClass().getDeclaredFields())

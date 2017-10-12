@@ -102,10 +102,10 @@ public final class Pages {
     /**
      * Получение страницы по классу с возможностью выполнить проверку элементов страницы
      */
-    public static <T extends AkitaPage> T getPage(Class<T> clazz, boolean checkIfElementsAppeared) {
+    static <T extends AkitaPage> T getPage(Class<T> clazz, boolean checkIfElementsAppeared) {
         T page = Selenide.page(clazz);
         if (checkIfElementsAppeared) {
-            page.isAppeared();
+            page.appeared();
         }
         return page;
     }

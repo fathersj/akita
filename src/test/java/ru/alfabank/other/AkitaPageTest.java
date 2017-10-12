@@ -34,9 +34,10 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static ru.alfabank.alfatest.cucumber.api.AkitaPage.getButtonFromListByName;
+import static ru.alfabank.alfatest.cucumber.api.AkitaPage.getElementFromListByName;
 
 public class AkitaPageTest {
+
     private static AkitaPageMock alfaPageMock;
     private static AkitaPage page;
 
@@ -90,11 +91,11 @@ public class AkitaPageTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void getButtonFromListByNameNegative() {
+    public void getElementFromListByNameNegative() {
         SelenideElement selenideElementMock = alfaPageMock.getMockCss();
         List<SelenideElement> list = new LinkedList<>();
         list.add(selenideElementMock);
-        getButtonFromListByName(list, "test");
+        getElementFromListByName(list, "test");
     }
 
     @Test
@@ -125,10 +126,10 @@ public class AkitaPageTest {
 
     @Ignore
     @Test
-    public void getButtonFromListByNamePositive() {
+    public void getElementFromListByNamePositive() {
         SelenideElement selenideElement = alfaPageMock.getGoodButton();
         List<SelenideElement> list = new LinkedList<>();
         list.add(selenideElement);
-        assertThat(getButtonFromListByName(list, "GoodButton"), is(notNullValue()));
+        assertThat(getElementFromListByName(list, "GoodButton"), is(notNullValue()));
     }
 }
